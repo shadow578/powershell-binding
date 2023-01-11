@@ -3,7 +3,7 @@ import { isAny } from '@shadow578/type-guardian/lib/TypeGuards';
 import { PowerShellError } from '../powershell/PowerShellError';
 import { assertParametersValid, ParameterRecord } from '../powershell/shim/Parameters';
 import { Shim } from '../powershell/shim/Shim';
-import { getMethodParameterNames, getRandomString } from '../util';
+import { getFunctionParameterNames, getRandomString } from '../util';
 import { IPowerShellBinding } from './PowerShellBinding';
 
 /**
@@ -86,7 +86,7 @@ export function PowerShellCall<T = void>(
     if (originalMethod === undefined) {
       throw new TypeError('method descriptor value was undefined');
     }
-    const parameterNames = getMethodParameterNames(originalMethod);
+    const parameterNames = getFunctionParameterNames(originalMethod);
 
     // re-defined the method
     descriptor.value = async function (this: IPowerShellBinding, ...parameterValues: unknown[]): Promise<T> {
@@ -141,7 +141,7 @@ export function PowerShellCall<T = void>(
 /**
  * convert a method's raw parameter list to a record from parameter name to parameter value
  *
- * @param parameterNames the parameter name list. see {@link getMethodParameterNames}
+ * @param parameterNames the parameter name list. see {@link getFunctionParameterNames}
  * @param parameterValues the parameter value list
  * @returns a record from the method parameter name to the parameter value
  */

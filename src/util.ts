@@ -24,7 +24,8 @@ export function base64Decode(source: string): string {
  * create a new random string.
  * the string will only contain alphanumerical characters ([A-Za-z0-9])
  *
- * @param length the length of the string. must be even
+ * @param length the length of the string.
+ *               if not even, the length is shortened by one character
  * @returns a random string
  */
 export function getRandomString(length: number): string {
@@ -32,18 +33,18 @@ export function getRandomString(length: number): string {
 }
 
 /**
- * get the parameter names of a method
+ * get the parameter names of a function or method
  *
- * @param method the method to get the parameter names of
- * @returns a array containing the parameter names of the method in order
+ * @param fn the function to get the parameter names of
+ * @returns a array containing the parameter names of the function, in order
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function getMethodParameterNames(method: Function): string[] {
+export function getFunctionParameterNames(fn: Function): string[] {
   // convert method body to a string, reduce to a single line
-  const methodDefinition = method.toString().replace(/\r?\n/g, '');
+  const methodDefinition = fn.toString().replace(/\r?\n/g, '');
 
   // prepare regex with method name embedded
-  const regex = new RegExp(`^(?:async\\s)?(?:function\\s)?(?:${method.name})?\\s*\\(([\\w\\s,_]*)\\)\\s*{`);
+  const regex = new RegExp(`^(?:async\\s)?(?:function\\s)?(?:${fn.name})?\\s*\\(([\\w\\s,_]*)\\)\\s*{`);
 
   // get the parameter list of the method
   const parameterListMatch = methodDefinition.match(regex);
