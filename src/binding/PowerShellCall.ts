@@ -7,9 +7,9 @@ import { getFunctionParameterNames, getRandomString } from '../util';
 import { IPowerShellBinding } from './PowerShellBinding';
 
 /**
- * additional options for {@link PowerShellDecorator}
+ * additional options for {@link PowerShellCall}
  */
-export interface PowerShellDecoratorOptions {
+export interface PowerShellCallOptions {
   /**
    * expand parameters to be available directly.
    * if enabled, '$params.MyParameter' can be replaced with '$MyParameter'.
@@ -36,18 +36,12 @@ export interface PowerShellDecoratorOptions {
 }
 
 /**
- * default values for {@link PowerShellDecoratorOptions}
+ * default values for {@link PowerShellCallOptions}
  */
-const DEFAULT_OPTIONS: PowerShellDecoratorOptions = {
+const DEFAULT_OPTIONS: PowerShellCallOptions = {
   expandParameters: true,
   serializationDepth: 2,
 };
-
-/**
- * shorthand for {@link PowerShellCall}
- */
-//TODO: this shorthand should be moved elsewhere
-export const PS = PowerShellCall;
 
 /**
  * helper function to make typescript shut up about missing function implementation
@@ -74,10 +68,10 @@ export function psCall<T>(): Promise<T> {
 export function PowerShellCall<T = void>(
   command: string,
   typeGuard: TypeGuard<T> = isAny,
-  options: Partial<PowerShellDecoratorOptions> = {},
+  options: Partial<PowerShellCallOptions> = {},
 ) {
   // merge default values into provided options
-  const fullOptions: PowerShellDecoratorOptions = {
+  const fullOptions: PowerShellCallOptions = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
