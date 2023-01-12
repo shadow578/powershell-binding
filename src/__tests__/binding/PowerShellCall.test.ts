@@ -91,6 +91,14 @@ class ExampleBinding extends PowerShellBinding {
   }
 
   /**
+   * @returns "person.FirstName $person.LastName"
+   */
+  @PowerShellCall('Write-Output "$($person.FirstName) $($person.LastName)"', isString)
+  getPersonFullName(person: Person) {
+    return psCall<string>();
+  }
+
+  /**
    * always throws a exception with the message "test exception"
    */
   @PowerShellCall('throw "test exception"', isVoid)
@@ -151,6 +159,17 @@ describe('@PowerShellCall', () => {
         Age: 24,
         Friends: ['Tony', 'Aunt May', 'Uncle Ben'],
       });
+    });
+
+    test('input object', async () => {
+      await expect(
+        binding.getPersonFullName({
+          FirstName: 'Peter',
+          LastName: 'Parker',
+          Age: 24,
+          Friends: [],
+        }),
+      ).resolves.toBe('Peter Parker');
     });
   });
 
