@@ -59,11 +59,15 @@ export class DefaultShim implements Shim {
             catch {
                 $__capture = @{
                     "success" = $false
-                    "data"    = @($_)
+                    "data"    = @(@{
+                      "Exception" = ($_.Exception.Message)
+                      "FullyQualifiedErrorId" = ($_.FullyQualifiedErrorId)
+                      "InvocationInfo" = ("$($_.InvocationInfo.Line) (at $($_.InvocationInfo.ScriptLineNumber),$($_.InvocationInfo.OffsetInLine) )")
+                    })
                 }
             }
         } | Out-Null
-        Write-Output "{{${id}=$(([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((ConvertTo-Json $__capture -Depth (${ options.resultSerializationDepth + 1 }) -Compress)))))}}"
+        Write-Output "{{${id}=$(([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((ConvertTo-Json $__capture -Depth (${ Math.min(options.resultSerializationDepth + 1, 100) }) -Compress)))))}}"
     }; __shim`;
   }
 
