@@ -50,6 +50,13 @@ const DEFAULT_OPTIONS: PowerShellDecoratorOptions = {
 export const PS = PowerShellCall;
 
 /**
+ * helper function to make typescript shut up about missing function implementation
+ */
+export function psCall<T>(): Promise<T> {
+  throw new Error('powershell call should have been replaced by decorator');
+}
+
+/**
  * decorator for powershell binding functions
  *
  * @param command the powershell command to be executed by this binding function
