@@ -93,9 +93,17 @@ export class DefaultShim implements Shim {
 
     // transform output
     if (output.success) {
-      return {
-        data: output.data,
-      };
+      // if output data is zero length, the command returned nothing (void call)
+      // so we have to return undefined in data
+      if (output.data.length === 0) {
+        return {
+          data: undefined,
+        };
+      } else {
+        return {
+          data: output.data,
+        };
+      }
     } else {
       if (!isPowerShellException(output.data[0])) {
         throw new TypeError('could not decode exception from shim output');
