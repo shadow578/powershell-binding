@@ -1,19 +1,21 @@
 {
-  "name": "typescript-project-template",
+  "name": "@shadow578/powershell-binding",
   "version": "0.1.0",
   "description": "",
   "author": "shadow578",
   "license": "MIT",
   "keywords": [
-    "typescript"
+    "typescript",
+    "powershell",
+    "binding"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shadow578/typescript-project-template.git"
+    "url": "git+https://github.com/shadow578/powershell-binding.git"
   },
-  "homepage": "https://github.com/shadow578/typescript-project-template",
+  "homepage": "https://github.com/shadow578/powershell-binding",
   "bugs": {
-    "url": "https://github.com/shadow578/typescript-project-template/issues"
+    "url": "https://github.com/shadow578/powershell-binding/issues"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -22,7 +24,6 @@
   ],
   "scripts": {
     "build": "tsc",
-    "start": "npm run build & node .",
     "test": "jest --config jestconfig.json",
     "format": "prettier --ignore-path .gitignore --write \"src/**/*.+(js|ts|json)\"",
     "lint": "eslint --ext .js,.ts src",
