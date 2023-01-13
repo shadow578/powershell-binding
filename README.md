@@ -1,105 +1,127 @@
-# typescript-project-template
-
-A simple project template for a library or node application written in typescript. 
-
-- code and tests in `typescript`
-- linting using `eslinit`
-- formatting using `prettier`
-- testing using `jest` and `ts-jest`
+# @shadow578/powershell-binding
+Simple bindings for PowerShell in Node.js using class decorators.
 
 
-## Setup
-After cloning, first run the following command:
+## Installation
+Install `@shadow578/powershell-binding` using npm:
+
 ```shell
-npm i
+npm install @shadow578/powershell-binding
 ```
 
-After the command finished, you'll want to adjust the `package.json` and `tsconfig.json` to better match your use-case.
+## Usage
+### Importing the Module
+Import the `@shadow578/powershell-binding` module using the following code:
 
-### Library Project
-For a library project (that you wish to publish on npm), remove the following script from the `package.json`:
-
-```json
-"scripts": {
-  "start": "npm run build & node .",
-},
-```
-
-### Node Application Project
-For a application project using node, remove the following scripts from the `package.json` (unless you want to publish the application on npm):
-
-```json
-"scripts": {
-  "prepare": "npm run build",
-  "prepublishOnly": "npm test && npm run lint",
-},
-```
-
-Additionally, you may remove any of the following lines in the `package.json`:
-
-```json
-"description": "",
-"author": "shadow578",
-"license": "Apache-2.0",
-"keywords": [
-  "typescript"
-],
-"repository": {
-  "type": "git",
-  "url": "git+https://github.com/shadow578/typescript-project-template.git"
-},
-"homepage": "https://github.com/shadow578/typescript-project-template",
-"bugs": {
-  "url": "https://github.com/shadow578/typescript-project-template/issues"
-},
-"types": "lib/index.d.ts",
-"files": [
-  "lib/**/*"
-],
+```typescript
+import { PowerShellBinding, PowerShellCall } from "@shadow578/powershell-binding";
 ```
 
 
-Additionally, you may want to adjust the `tsconfig.json` file to use the recommended settings for node.
-To do this, first install the `@tsconfig/node18` package using
-```shell
-npm install --save-dev @tsconfig/node18
-```
+### Creating a Binding Class
+To create a binding class, create a class extending `PowerShellBinding`:
 
-Now, adjust the `tsconfig.json` to match the following:
-```json
-{
-  "extends": "@tsconfig/node18/tsconfig.json",
-  "compilerOptions": {
-    "moduleResolution": "Node",
-    "outDir": "lib",
-    "strict": true,
-    "sourceMap": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+```typescript
+class MyBinding extends PowerShellBinding {
+  // ...
 }
 ```
 
+#### Custom Shims
+By default, the `PowerShellBinding` class uses the `DefaultShim` to convert input parameters and output objects to and from PowerShell. 
+However, custom shims may be used by overriding the `shim` property of the `PowerShellBinding` class:
 
-You may also adjust the `.eslintrc.json` file and set `"browser": false`.
+```typescript
+class MyBinding extends PowerShellBinding {
+  get shim(): Shim {
+      return myShim;
+  }
+}
+```
 
-
-## Usage
-### Commands
-
- | Command              | Description                                        | Library | Node Application |
- | -------------------- | -------------------------------------------------- | ------- | ---------------- |
- | `npm run build`      | Build the Project (`tsc`)                          | ✔️       | ✔️                |
- | `npm start`          | Build and Start the Application                    | ❌       | ✔️                |
- | `npm test`           | Run all unit tests                                 | ✔️       | ✔️                |
- | `npm run format `    | Format all files with `prettier`                   | ✔️       | ✔️                |
- | `npm run lint`       | Lint all files with `es-lint`                      | ✔️       | ✔️                |
- | `npm version ()...)` | Change the project version (see below)             | ✔️       | ✔️                |
- | `npm publish `       | Build, Test, Lint. Then Publish the Library to npm | ✔️       | ❌\*              |
+Custom shims must implement the `Shim` interface.
+For more details on how to implement a custom shim, see the [DefaultShim implementation](/src/powershell/shim/DefaultShim.ts).
 
 
-#### Details on `npm version`
-with `npm version (...)`, the version of the project can be changed easily.
-the project is configured in such a way that changing the version automaticall creates a new tag and pushes it to the remote repository (if set up).
 
-For more details, see [the npm docs](https://docs.npmjs.com/cli/v8/commands/npm-version)
+### Creating a Binding Method
+To create a binding method, create a method in the binding class with the `@PowerShellCall` decorator:
+
+```typescript
+class MyBinding extends PowerShellBinding {
+  @PowerShellCall('Write-Output "Hello, $name!"', isString)
+  greet(name: string) {
+    return psCall<string>();
+  }
+}
+```
+
+The `@PowerShellCall` decorator takes the following parameters:
+| Name        | Description                                                 | Default |
+| ----------- | ----------------------------------------------------------- | ------- |
+| `command`   | The command to execute in PowerShell                        |         |
+| `typeGuard` | A function that checks if the output is of the correct type | `isAny` |
+| `options`   | Additional options for the PowerShell call                  | `{}`    |
+
+
+The `command` parameter takes a string containing the command to execute in PowerShell. The command may contain parameters, which are passed to the method as arguments. 
+The parameters are automatically converted to PowerShell variables and are available in the command.
+
+</br>
+
+The `typeGuard` parameter takes a function with the following signature:
+```typescript
+(input: unknown) => input is T
+```
+
+Such functions may be created using the [@shadow578/type-guardian](https://www.npmjs.com/package/@shadow578/type-guardian) package.
+
+</br>
+
+The `options` parameter takes the following properties:
+| Name                 | Description                                                                                                                                                                          | Default |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `expandParameters`   | Whether to expand the parameters to variables. If false, parameters are only available in the `$params` variable                                                                     | `true`  |
+| `serializationDepth` | How deep the output object should be serialized (See [ConvertTo-Json docs](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertto-json#-depth)). | `2`     |
+
+#### The `psCall` Function
+The `psCall` function is used to stub the implementation of the binding method.
+By itself, it does nothing but throw a Error, but it is replaced by the `@PowerShellCall` decorator with the actual implementation.
+
+
+### Calling a Binding Method
+To call a binding method, create an instance of the binding class and call the method:
+
+```typescript
+const binding = new MyBinding();
+const output = await binding.greet("World");
+// output === "Hello, World!"
+```
+
+#### Exception Handling
+If an exception is thrown in PowerShell, it is re-thrown in JavaScript as a `PowerShellError`.
+
+<br/>
+
+#### Binding Class Options
+By default `PowerShellBinding` constructor creates a new `PowerShell` instance using the default options. 
+Further options may be passed to the `PowerShell` constructor using the `options` parameter. 
+See [The `node-powershell` docs](https://www.npmjs.com/package/node-powershell) for possible options.
+
+Additionally, a pre-existing `PowerShell` instance may be passed to the `PowerShellBinding` constructor using the `instance` parameter. 
+In this case, the parameter `options` is ignored.
+
+
+## Examples
+For more examples, see [`DocumentationExamples.test.ts`](/src/__tests__/DocumentationExamples.test.ts) and [`PowerShellCall.test.ts`](/src/__tests__/binding/PowerShellCall.test.ts). 
+
+
+## Limitations
+- Input parameters to binding methods must be serializable using `JSON.stringify` and deserializable using `ConvertFrom-Json`¹.
+- Outputs of binding methods must be serializable using `ConvertTo-Json` and deserializable using `JSON.parse`¹.
+- Outputs of binding methods may only have a depth of 100².
+- Commands in binding methods cannot be interactive.
+
+> ¹ generally, any value of type `string`, `number`, `boolean`, `object`, or a array of those types, should work.
+
+> ² depends on used shim. For the default shim, the depth is limited to 99.
